@@ -1,8 +1,9 @@
 package me.mig.cxb.web
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.io.IO
 import me.mig.cxb.actor.{ActorNames, SubSystem}
+import me.mig.cxb.service.TestServiceWorker
 import spray.can.Http
 
 import scala.concurrent.ExecutionContext
@@ -25,4 +26,6 @@ class TestAPIActor extends Actor with TestCxService {
 
   def receive: Receive = runRoute(routes)
   def actorRefFactory = context
+
+  override val ds: ActorRef = context.actorOf( TestServiceWorker.props )
 }

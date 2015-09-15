@@ -1,9 +1,13 @@
 package me.mig.cxb.web
 
+import akka.pattern._
+import akka.actor.ActorRef
 import me.mig.cxb.web.auth.ResourceAuthenticator
 import spray.http.MediaTypes._
 import spray.json.DefaultJsonProtocol
 import spray.routing.HttpService
+import akka.util.Timeout
+import scala.concurrent.duration._
 
 case class TestModel(name:String)
 
@@ -13,9 +17,13 @@ object TestJsonFormat extends DefaultJsonProtocol {
 
 trait TestCxService extends HttpService with ResourceAuthenticator {
 
+  implicit val timeout = Timeout(5 seconds)
+
   import TestJsonFormat._
   import spray.httpx.SprayJsonSupport.sprayJsonMarshaller
   import spray.httpx.SprayJsonSupport.sprayJsonUnmarshaller
+
+  val ds:ActorRef
 
   def routes = root
 
@@ -27,8 +35,13 @@ trait TestCxService extends HttpService with ResourceAuthenticator {
     } ~ path("json") {
       authorize(allowedScopes(auth, "test-scope")) {
         respondWithMediaType(`application/json`) {
-
-          complete( TestModel("chris") )
+          complete {
+            (ds ? TestModel("chris"))
+              .mapTo[TestModel]
+              .recover {
+                case ex => TestModel( "error: " + ex.getMessage )
+              }
+          }
         }
       }
     } ~ path("test" / Segment) { x =>

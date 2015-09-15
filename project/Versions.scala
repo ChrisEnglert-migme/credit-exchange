@@ -12,5 +12,5 @@ object Versions {
   val typesafeConfigVersion = sys.props.get("cxb.typesafeConfigVersion").getOrElse("1.3.0")
 
 
-  val fissionVersion = sys.props.get("cxb.fissionVersion").getOrElse("1.0.19")
+  val fissionVersion = sys.props.get("cxb.fissionVersion").getOrElse("1.0.20")
 }
